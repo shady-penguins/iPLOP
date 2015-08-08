@@ -19,7 +19,7 @@ def PlayGame(request, cups_removed=0):
         data = request.body.decode('utf8')
         data = json.loads(data)
         cups_removed = data['cupsRemoved']
-        if game.current_team == game.team_a:
+        if game.current_team == game.team_a.pk:
             game.team_a_cups_left -= cups_removed
             game.current_team = game.team_b.pk
         else:
