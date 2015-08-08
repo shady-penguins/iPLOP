@@ -1,15 +1,15 @@
+import datetime
 from django.db import models
 
 class Game(models.Model):
     team_a= models.ForeignKey(Team)
     team_b= models.ForeignKey(Team)
-    date_played = models.DateTimeField
+    date_played = models.DateTimeField(default=datetime.datetime.now)
     winner = models.ForeignKey(Team, default=None)
-    score = models.IntegerField()
     status = models.BooleanField(default=True)
-    current_team = models.ForeignKey(Team, default=None)
-    team_a_cups_left = models.IntegerField()
-    team_b_cups_left = models.IntegerField()
+    current_team = models.ForeignKey(Team, default=team_a)
+    team_a_cups_left = models.IntegerField(default=10)
+    team_b_cups_left = models.IntegerField(default=10)
 
 class Team(models.Model):
     Player1 = models.ForeignKey(Player)
