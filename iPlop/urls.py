@@ -20,5 +20,4 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^game/', ('iPlop.beerpong.views.PlayGame')),
     url(r'^blank/', ('iPlop.beerpong.views.Blank')),
-    url(r'^listen/', ('iPlop.beerpong.views.game_response'))
 ]
