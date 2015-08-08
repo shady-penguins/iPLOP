@@ -18,5 +18,5 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^game/', ('beerpong.views.play_game'), name='game'),
+    url(r'^game/', ('iPlop.beerpong.views.PlayGame')),
 ]
