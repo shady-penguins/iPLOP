@@ -21,4 +21,4 @@ def PlayGame(request, game=None, cups_removed=0):
         if game.team_a_cups_left == 0 or game.team_b_cups_left == 0:
             game.winner = game.current_team
             game.status = False
-    return JsonResponse(jsoçn.dumps(game, default=lambda o: o.__dict__), safe=False)
+    return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
