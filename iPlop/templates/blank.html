@@ -7,6 +7,16 @@
   <script src="https://kandy-portal.s3.amazonaws.com/public/javascript/kandy/2.3.0/kandy.js"></script>
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <style>
+    #scoreCard {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #scoreCard td, th {
+      border: 1px solid black;
+      font-weight: bold;
+      font-size: x-large;
+      padding: 10px 10px 10px 10px;
+    }
     .hidden {
       display: none;
     }
@@ -15,7 +25,42 @@
       background-color: #000;
       background-size: contain;
       height: 300px;
+      width: 400px;
+      margin-top: 20px;
     }
+
+    body {
+      margin-left: 20px;
+      margin-top: 20px;
+    }
+
+    #status {
+      font-size: large;
+      font-weight: bold;
+      color: green;
+    }
+    .username {
+      font-weight: bold;
+    }
+
+    #logoutButton {
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: -webkit-flex;
+      display: flex;
+      -webkit-flex-direction: row;
+      flex-direction: row;
+    }
+
+    .box {
+      border: solid 1px red;
+      flex: 2 0 0;
+
+    }
+
+
 
 
   </style>
@@ -73,8 +118,6 @@
     function onCallAnsweredFailed(call) {
       console.debug('callanswerfailed');
       callId = null;
-      $('#incoming-video').addClass('hidden');
-      $('#outgoing-video').addClass('hidden');
     }
     // Event handler for callrejectfailed event
     function onCallRejectFailed() {
@@ -91,6 +134,7 @@
       callId = call.getId();
 
       kandy.call.startCallVideo(callId, function() {
+        updateGame();
         console.log("Started call video onCallInitiate");
       });
 
@@ -107,14 +151,14 @@
 
       $audioRingOut[0].pause();
       UIState.initial();
-      $('#incoming-video').addClass('hidden');
-      $('#outgoing-video').addClass('hidden');
       alert('call failed');
     }
     // Event handler for oncall event
     function onCall(call) {
       callId = call.getId();
-      console.log(callId);
+
+//  TODO: Update game
+updateGame();
 
       kandy.call.startCallVideo(callId, function() {
         console.log("Started call video onCall");
@@ -147,8 +191,6 @@
       $audioRingIn[0].pause();
 
       UIState.initial();
-      $('#incoming-video').addClass('hidden');
-      $('#outgoing-video').addClass('hidden');
     }
     // Event handler for callincoming event
   function onCallIncoming(call, isAnonymous) {
@@ -170,6 +212,10 @@
   // Event handler for oncallanswered event
   function onCallAnswer(call) {
     callId = call.getId();
+
+
+// TODO: refresh the game
+updateGame();
 
     console.log("Call answered: "+callId);
 
@@ -243,7 +289,7 @@
       $('#status').html('');
       loggedInUser = username;
       $('#login-form').addClass('hidden');
-      $('#logged-in').removeClass('hidden');
+      $('.logged-in').removeClass('hidden');
       $('#logoutButton').removeClass('hidden');
       $('.username').text(username);
     };
@@ -251,7 +297,7 @@
     UIState.unauthenticated = function() {
       console.log("Unauthenticated");
       $('#login-form').removeClass('hidden');
-      $('#logged-in').addClass('hidden');
+      $('.logged-in').addClass('hidden');
       $('#logoutButton').addClass('hidden');
       $('.username').text('');
     };
@@ -287,8 +333,6 @@
       });
     });
     $('#make-call-btn').click(function() {
-      $('#incoming-video').removeClass('hidden');
-      $('#outgoing-video').removeClass('hidden');
       if (loggedInUser) {
         if (loggedInUser === user1) {
           console.log("Calling user2");
@@ -299,7 +343,37 @@
         }
       }
     });
+
+    function updateGame() {
+      $.get('/game', function(gameData) {
+        var game = JSON.parse(gameData);
+        
+        var teamA = game._team_a_cache;
+        var teamB = game._team_b_cache;
+  
+        var scoreA = game.team_a_cups_left;
+        var scoreB = game.team_b_cups_left;
+        
+        $('.team_a_name').html(teamA.name);
+        $('.team_b_name').html(teamB.name);
+  
+        $('#teamAScore').html(scoreA);
+        $('#teamBScore').html(scoreB);
+  
+  
+      });
+    }
+  
+    $('#refreshGame').click(function(e) { 
+      console.log("Refreshing game");
+      e.preventDefault();
+      updateGame();
+  
+    });
+
+
   });
+
   </script>
 
 </head>
@@ -311,20 +385,34 @@
     <div id="login-user-2">Login User 2</div>
   </div>
 
-  <div id="logged-in" class="hidden">
-    <div class='username'></div>
-    <div id='logoutButton' class='hidden'>Logout</div>
+  <div class="logged-in hidden">
+    <span style="margin-bottom: 10px"> Username: <span class='username'></span></span>
+    <button class="btn btn-danger" id="logoutButton">Logout</button>
 
     <div class="btn-toolbar">
       <button class="btn btn-success" id="answer-call-btn">Answer Call</button>
       <button class="btn btn-warning" id="reject-call-btn">Reject Call</button>
       <button class="btn btn-danger" id="end-call-btn">End Call</button>
-      <button class="btn btn-danger" id="make-call-btn">Make Call</button>
+      <button class="btn btn-success" id="make-call-btn">Make Call</button>
     </div>
-    <div class="hidden" id="incoming-video">
-      <video id="kandyRemoteVideo" width="100%" height="100%" autoplay="autoplay">
-    </div>
-    <div class="hidden" id="outgoing-video"></div>
   </div>
+  <section class="row">
+    <section class="box">
+      <div class="logged-in hidden">
+        <div id="incoming-video">
+          <video id="kandyRemoteVideo" width="100%" height="100%" autoplay="autoplay">
+        </div>
+      </div>
+      </section>
+      <section class="box">
+        <div>Team A: <span class="team_a_name"></span></div>
+        <div>Team B: <span class="team_b_name"></span></div>
+        <table id='scoreCard'>
+          <tr><td class='team_a_name'></td><td class='team_b_name'></td></tr>
+          <tr><td id='teamAScore'></td><td id='teamBScore'></td></tr>
+        </table>
+      </section>
+  </section>
+  <button id='refreshGame'>Refresh Game</button>
 </body>
 </html>
