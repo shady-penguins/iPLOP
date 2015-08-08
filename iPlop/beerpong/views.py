@@ -7,19 +7,18 @@ from iPlop.beerpong.models import Team, Game
 
 
 def PlayGame(request, game=None, cups_removed=0):
-    if game is None:
+    if request.method == "GET":
         game = Game(team_a=Team.objects.get(pk=1,), team_b=Team.objects.get(pk=2,))
-    else:
+        return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
+
+    if request.method == "POST":
         if game.current_team == game.team_a:
             game.team_a_cups_left -= cups_removed
             game.current_team = game.team_b
         else:
             game.team_b_cups_left -= cups_removed
             game.current_team = game.team_a
-        if game.current_team == 0:
+        if game.team_a_cups_left == 0 or game.team_b_cups_left == 0:
             game.winner = game.current_team
             game.status = False
-    return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
-
-def Blank(request):
-    return render(request, 'blank.html')
+    return JsonResponse(jsoçn.dumps(game, default=lambda o: o.__dict__), safe=False)
