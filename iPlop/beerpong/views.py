@@ -21,7 +21,7 @@ def PlayGame(request, cups_removed=0):
         cups_removed = data['cupsRemoved']
         if game.current_team == game.team_a:
             game.team_a_cups_left -= cups_removed
-            game.current_team = game.team_pk
+            game.current_team = game.team_b.pk
         else:
             game.team_b_cups_left -= cups_removed
             game.current_team = game.team_a.pk
