@@ -11,10 +11,6 @@ game = Game(team_a=Team.objects.get(pk=1,), team_b=Team.objects.get(pk=2,))
 @csrf_exempt
 def PlayGame(request, cups_removed=0):
     global game
-    if request.method == "GET":
-        game = Game(team_a=Team.objects.get(pk=1,), team_b=Team.objects.get(pk=2,))
-        return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
-
     if request.method == "POST":
         data = request.body.decode('utf8')
         data = json.loads(data)
@@ -30,6 +26,13 @@ def PlayGame(request, cups_removed=0):
         game.winner = game.current_team
         game.status = False
     return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
+
+def MakeGame(request, cups_removed=0):
+    global game
+    if request.method == "GET":
+        game = Game(team_a=Team.objects.get(pk=1,), team_b=Team.objects.get(pk=2,))
+        return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
+
 
 @csrf_exempt
 def Blank(request):
