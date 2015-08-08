@@ -3,10 +3,24 @@
   <!--Load Bootstrap CSS (optional)-->
   <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
   <link rel="stylesheet" media="screen" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css" />
+  <link href='http://fonts.googleapis.com/css?family=Sigmar+One' rel='stylesheet' type='text/css'>
 
   <script src="https://kandy-portal.s3.amazonaws.com/public/javascript/kandy/2.3.0/kandy.js"></script>
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <style>
+    #header {
+      font-family: 'Sigmar One', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #mainheader {
+      font-size: 48px;
+    }
+    #subheader {
+      font-size: xx-large;
+
+    }
     #scoreCard {
       margin-left: auto;
       margin-right: auto;
@@ -57,12 +71,9 @@
     .box {
       border: solid 1px red;
       flex: 2 0 0;
+      align-content: center;
 
     }
-
-
-
-
   </style>
 
   <script>
@@ -316,11 +327,13 @@ updateGame();
     }
 
     $('#login-user-1').click(function(e) {
+      $('#login-form').addClass('hidden');
       e.preventDefault();
       console.log("clicked user 1");
       loginUser1();
     });
     $('#login-user-2').click(function(e) {
+      $('#login-form').addClass('hidden');
       e.preventDefault();
       console.log("clicked user 2");
       loginUser2();
@@ -359,6 +372,26 @@ updateGame();
   
         $('#teamAScore').html(scoreA);
         $('#teamBScore').html(scoreB);
+
+        var currentTeam = game.current_team;
+
+        if (currentTeam === 1) {
+          if (loggedInUser === 'user1@iplop.gmail.com') {
+            $('#turnStatus').html("It is your turn");
+            $('#turnOptions').removeClass('hidden');
+          } else if (loggedInUser === 'user2@iplop.gmail.com') {
+            $('#turnStatus').html('It is your opponent\'s turn.');
+            $('#turnOptions').addClass('hidden');
+          }
+        } else if (currentTeam === 2) {
+          if (loggedInUser === 'user2@iplop.gmail.com') {
+            $('#turnStatus').html("It is your turn");
+            $('#turnOptions').removeClass('hidden');
+          } else if (loggedInUser === 'user1@iplop.gmail.com') {
+            $('#turnStatus').html('It is your opponent\'s turn.');
+            $('#turnOptions').addClass('hidden');
+          }
+        }
   
   
       });
@@ -371,6 +404,18 @@ updateGame();
   
     });
 
+    $('#submitTurn').click(function(e) {
+      e.preventDefault();
+      var cupsRemoved = $('#cupsRemoved').val();
+      console.log("Cups removed: "+cupsRemoved);
+      $.post('/game/', { 'cupsRemoved': cupsRemoved })
+        .done(function(data) {
+          updateGame();
+
+       });
+
+    });
+
 
   });
 
@@ -378,8 +423,13 @@ updateGame();
 
 </head>
 <body>
-  <div id="status"></div>
 
+  <div id="header">
+    <div id="mainheader">BEER PONG</div>
+    <div id="subheader">International Professional League of Official Proffessionals</div>
+  </div>
+
+  <div id="status"></div>
   <div id="login-form">
     <div id="login-user-1">Login User 1</div>
     <div id="login-user-2">Login User 2</div>
@@ -411,6 +461,25 @@ updateGame();
           <tr><td class='team_a_name'></td><td class='team_b_name'></td></tr>
           <tr><td id='teamAScore'></td><td id='teamBScore'></td></tr>
         </table>
+        <div class='hidden' id='turnStatus'></div>
+        <div id='turnOptions'>
+          <select id='cupsRemoved'>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+          <button id="submitTurn">End Turn</button>
+
+
+        </div>
       </section>
   </section>
   <button id='refreshGame'>Refresh Game</button>
