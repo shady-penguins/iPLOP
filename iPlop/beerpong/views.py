@@ -21,3 +21,5 @@ def PlayGame(request, game=None, cups_removed=0):
             game.status = False
     return JsonResponse(json.dumps(game, default=lambda o: o.__dict__), safe=False)
 
+def Blank(request):
+    return render(request, 'blank.html')

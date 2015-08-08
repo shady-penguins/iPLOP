@@ -58,7 +58,7 @@ ROOT_URLCONF = 'iPlop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': ['iplop/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
