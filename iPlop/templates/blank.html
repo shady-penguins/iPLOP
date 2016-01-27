@@ -145,7 +145,6 @@
       callId = call.getId();
 
       kandy.call.startCallVideo(callId, function() {
-        updateGame();
         console.log("Started call video onCallInitiate");
       });
 
@@ -169,7 +168,6 @@
       callId = call.getId();
 
 //  TODO: Update game
-updateGame();
 
       kandy.call.startCallVideo(callId, function() {
         console.log("Started call video onCall");
@@ -226,7 +224,6 @@ updateGame();
 
 
 // TODO: refresh the game
-updateGame();
 
     console.log("Call answered: "+callId);
 
@@ -315,6 +312,7 @@ updateGame();
 
     UIState.oncall = function() {
       console.log('oncall');
+      makeGame();
 
       $('#incoming-call, #call-form').addClass('hidden');
       $('#call-connected').removeClass('hidden');
@@ -357,18 +355,46 @@ updateGame();
       }
     });
 
+    function makeGame(callback) {
+      console.log("Making game");
+      $.get('/makegame', function(gameData) {
+        updateGame();
+      });
+    }
+
     function updateGame() {
+      console.log("Updating game");
       $.get('/game', function(gameData) {
         var game = JSON.parse(gameData);
+
         
         var teamA = game._team_a_cache;
         var teamB = game._team_b_cache;
   
         var scoreA = game.team_a_cups_left;
         var scoreB = game.team_b_cups_left;
-        
-        $('.team_a_name').html(teamA.name);
-        $('.team_b_name').html(teamB.name);
+
+        if (game.winner === 1) {
+          alert("Team "+teamB.name);
+          $('#turnStatus').addClass('hidden');
+          $('#turnOptions').addClass('hidden');
+          $('#status').html("Team "+teamB.name+" has won!");
+        } else if (game.winner === 2) {
+          alert("Team "+teamA.name);
+          $('#status').html("Team "+teamA.name+" has won!");
+          $('#turnStatus').addClass('hidden');
+          $('#turnOptions').addClass('hidden');
+        }
+
+
+        var imgAsrc = 'https://photos-3.dropbox.com/t/2/AAAdXuV7CslJYsm8hUfSHr9ODrp2HDoB7mGzdUHN_dT6Sg/12/23413808/jpeg/32x32/1/1439251200/0/2/shady-penguins.jpg/CLCIlQsgASACIAMgBCAFIAYgBygBKAIoBw/jumLwqThHgWyv_HNYY9Bj-mpo_PZj8e4BAlekqenMF0?size=1024x768&size_mode=2';
+        var imgBsrc = 'https://photos-1.dropbox.com/t/2/AADr3bUS-4-KWLp7DNwlXBXt_RU3czKzH_qzcELizKOvnA/12/23413808/jpeg/32x32/1/1439251200/0/2/dead-ducks.jpg/CLCIlQsgASACIAMgBCAFIAYgBygBKAIoBw/MQUsjL5BZSvwIvXBiwaofUmdpKHQQyaAE2KVj9apx5U?size=1024x768&size_mode=2';
+
+        var imgA = '<img src="'+imgAsrc+'" style="height: 100px">';
+        var imgB = '<img src="'+imgBsrc+'" style="height: 100px">';
+
+        $('.team_a_name').html(teamA.name+imgA);
+        $('.team_b_name').html(teamB.name+imgB);
   
         $('#teamAScore').html(scoreA);
         $('#teamBScore').html(scoreB);
@@ -408,7 +434,7 @@ updateGame();
       e.preventDefault();
       var cupsRemoved = $('#cupsRemoved').val();
       console.log("Cups removed: "+cupsRemoved);
-      $.post('/game/', { 'cupsRemoved': cupsRemoved })
+      $.post('/game/', JSON.stringify({ 'cupsRemoved': cupsRemoved }))
         .done(function(data) {
           updateGame();
 
@@ -425,8 +451,22 @@ updateGame();
 <body>
 
   <div id="header">
+    <table>
+      <tr>
+         <td>
+      <img src='https://photos-4.dropbox.com/t/2/AADRL0dqHwUJulYSgvaJZXUODJmoUXJkjDjiJJ43wAm3xw/12/23413808/jpeg/32x32/1/1439251200/0/2/iplop.jpg/CLCIlQsgASACIAMgBCAFIAYgBygBKAIoBw/MWfOs-u6r-mlWywsZhKgF_9Jt5bvLBcuXDDN-TWthJY?size=1024x768&size_mode=2' style='height: 300px'/>
+    </td>
+    <td>
     <div id="mainheader">BEER PONG</div>
-    <div id="subheader">International Professional League of Official Proffessionals</div>
+    <div id="subheader">
+      International Professional League of Official Proffessionals
+    </div>
+
+    </td>
+  </tr>
+
+
+    </table>
   </div>
 
   <div id="status"></div>
@@ -455,13 +495,11 @@ updateGame();
       </div>
       </section>
       <section class="box">
-        <div>Team A: <span class="team_a_name"></span></div>
-        <div>Team B: <span class="team_b_name"></span></div>
         <table id='scoreCard'>
           <tr><td class='team_a_name'></td><td class='team_b_name'></td></tr>
-          <tr><td id='teamAScore'></td><td id='teamBScore'></td></tr>
+          <tr><td id='teamBScore'></td><td id='teamAScore'></td></tr>
         </table>
-        <div class='hidden' id='turnStatus'></div>
+        <div id='turnStatus'></div>
         <div id='turnOptions'>
           <select id='cupsRemoved'>
             <option value="0">0</option>
